@@ -52,7 +52,7 @@ function init() {
   ReactFeatureFlags.enableEventAPI = true;
   React = require('react');
   ReactDOM = require('react-dom');
-  Press = require('react-events/press');
+  Press = require('react-events/press').Press;
   Scheduler = require('scheduler');
 }
 
@@ -2456,6 +2456,60 @@ describe('Event responder: Press', () => {
       jest.runAllTimers();
       expect(onLongPress).not.toBeCalled();
     });
+  });
+
+  it('does end on "scroll" to document', () => {
+    const onPressEnd = jest.fn();
+    const ref = React.createRef();
+    const element = (
+      <div>
+        <Press onPressEnd={onPressEnd}>
+          <a href="#" ref={ref} />
+        </Press>
+      </div>
+    );
+    ReactDOM.render(element, container);
+
+    ref.current.dispatchEvent(createEvent('pointerdown'));
+    document.dispatchEvent(createEvent('scroll'));
+    expect(onPressEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('does end on "scroll" to a parent container', () => {
+    const onPressEnd = jest.fn();
+    const ref = React.createRef();
+    const containerRef = React.createRef();
+    const element = (
+      <div ref={containerRef}>
+        <Press onPressEnd={onPressEnd}>
+          <a href="#" ref={ref} />
+        </Press>
+      </div>
+    );
+    ReactDOM.render(element, container);
+
+    ref.current.dispatchEvent(createEvent('pointerdown'));
+    containerRef.current.dispatchEvent(createEvent('scroll'));
+    expect(onPressEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not end on "scroll" to an element outside', () => {
+    const onPressEnd = jest.fn();
+    const ref = React.createRef();
+    const outsideRef = React.createRef();
+    const element = (
+      <div>
+        <Press onPressEnd={onPressEnd}>
+          <a href="#" ref={ref} />
+        </Press>
+        <span ref={outsideRef} />
+      </div>
+    );
+    ReactDOM.render(element, container);
+
+    ref.current.dispatchEvent(createEvent('pointerdown'));
+    outsideRef.current.dispatchEvent(createEvent('scroll'));
+    expect(onPressEnd).not.toBeCalled();
   });
 
   it('expect displayName to show up for event component', () => {
