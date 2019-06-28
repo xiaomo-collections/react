@@ -671,7 +671,6 @@ const PressResponder: ReactDOMEventResponder = {
           const isPointerEvent = type === 'pointerdown';
           const isKeyboardEvent = pointerType === 'keyboard';
           const isMouseEvent = pointerType === 'mouse';
-          const isPenEvent = pointerType === 'pen';
 
           if (isPointerEvent || isTouchEvent) {
             state.ignoreEmulatedMouseEvents = true;
@@ -683,16 +682,6 @@ const PressResponder: ReactDOMEventResponder = {
             if (!isValidKeyboardEvent(nativeEvent)) {
               return;
             }
-          }
-          // Ignore mouse/pen pressing on touch hit target area
-          if (
-            (isMouseEvent || isPenEvent) &&
-            context.isEventWithinTouchHitTarget(event)
-          ) {
-            // We need to prevent the native event to block the focus
-            removeRootEventTypes(context, state);
-            nativeEvent.preventDefault();
-            return;
           }
 
           // We set these here, before the button check so we have this
@@ -834,7 +823,7 @@ const PressResponder: ReactDOMEventResponder = {
         if (
           state.pressTarget !== null &&
           (pointerType !== 'mouse' ||
-            !context.isTargetWithinElement(target, state.pressTarget))
+            !context.isTargetWithinNode(target, state.pressTarget))
         ) {
           // Calculate the responder region we use for deactivation, as the
           // element dimensions may have changed since activation.
@@ -947,7 +936,7 @@ const PressResponder: ReactDOMEventResponder = {
               !isKeyboardEvent &&
               state.pressTarget !== null &&
               (pointerType !== 'mouse' ||
-                !context.isTargetWithinElement(target, state.pressTarget))
+                !context.isTargetWithinNode(target, state.pressTarget))
             ) {
               // If the event target isn't within the press target, check if we're still
               // within the responder region. The region may have changed if the
@@ -1004,7 +993,7 @@ const PressResponder: ReactDOMEventResponder = {
         if (
           pressTarget !== null &&
           (scrollTarget === doc ||
-            context.isTargetWithinElement(pressTarget, scrollTarget))
+            context.isTargetWithinNode(pressTarget, scrollTarget))
         ) {
           dispatchCancel(event, context, props, state);
         }
