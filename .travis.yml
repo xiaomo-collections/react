@@ -12,7 +12,7 @@ after_script:
   - git remote add upstream https://github.com/facebook/react.git
   - git fetch upstream
   - git checkout master
-  - git merge upstream/master
+  - git merge upstream
   - git init
   - git config user.name "xiaomo"
   - git config user.email "xiaomo@xiaomo.info"
